@@ -6,10 +6,11 @@ OralCancerPrediction/
 │   │   └── TCMA_raw.csv
 │   │
 │   └── 📁 processed/
-│       ├── Processed_merged_data.csv
-│       ├── target_merged_all_data.csv
-│       ├── merged_with_labels.csv
-│       └── selected_features.txt
+│       └── 📁 TCMA
+│           ├── Processed_merged_data.csv
+│           ├── target_merged_all_data.csv
+│           ├── merged_with_labels.csv
+│           └── selected_features.txt
 │
 ├── 📁 notebooks/
 │   ├── brief.ipynb

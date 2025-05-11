@@ -1,0 +1,16 @@
+Model Evaluation Report
+=======================
+
+Accuracy: 0.9550
+AUROC: 0.9723
+PR-AUC: 0.9644
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.96      0.98      0.97       282
+           1       0.95      0.91      0.93       140
+
+    accuracy                           0.95       422
+   macro avg       0.95      0.94      0.95       422
+weighted avg       0.95      0.95      0.95       422
