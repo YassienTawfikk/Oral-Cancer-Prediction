@@ -186,7 +186,7 @@ class DataPreprocessor:
 # -----------------------------------------------------------------------------
 def main():
     # Ensure processed-data folder exists (for feature-selected CSVs later)
-    os.makedirs("data/processed", exist_ok=True)
+    os.makedirs("../data/processed", exist_ok=True)
 
     # ── 1. Merge raw abundance + metadata ───────────────────────────────────
     merge_raw_data()
