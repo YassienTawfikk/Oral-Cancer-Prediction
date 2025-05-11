@@ -17,4 +17,3 @@ new_neoplasm_occurrence_anatomic_site_text
 TSS_tss_study
 planned_surgery_status
 number_of_relatives_with_stomach_cancer
-815

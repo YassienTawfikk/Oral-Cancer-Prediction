@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 class DataPreprocessor:
-    def __init__(self, data_dir='../Data/TCMA/Clean Data'):
+    def __init__(self, data_dir='../data/TCMA/Clean data'):
         self.data_dir = data_dir
         self.scaler = StandardScaler()
         self.label_encoder = LabelEncoder()
@@ -92,7 +92,7 @@ class DataPreprocessor:
                 data[col] = data[col].fillna('Unknown')
 
         # Log shape after handling missing values
-        logging.info(f"Data shape after handling missing values: {data.shape}")
+        logging.info(f"data shape after handling missing values: {data.shape}")
 
         # Handle categorical variables
         for col in categorical_cols:
@@ -201,11 +201,6 @@ class DataPreprocessor:
         return processed_data
 
 
-import os
-import logging
-import pandas as pd
-
-
 def main():
     # Initialize preprocessor
     preprocessor = DataPreprocessor()
@@ -214,7 +209,7 @@ def main():
     processed_data = preprocessor.process_all_files()
 
     # Save processed data
-    output_dir = 'processed_data'
+    output_dir = '../data/processed'
     os.makedirs(output_dir, exist_ok=True)
 
     for file_name, data in processed_data.items():

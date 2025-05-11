@@ -1,0 +1,40 @@
+OralCancerPrediction/
+│
+├── 📁 data/
+│   ├── 📁 raw/
+│   │   ├── HOMD_raw.csv
+│   │   └── TCMA_raw.csv
+│   │
+│   └── 📁 processed/
+│       ├── Processed_merged_data.csv
+│       ├── target_merged_all_data.csv
+│       ├── merged_with_labels.csv
+│       └── selected_features.txt
+│
+├── 📁 notebooks/
+│   ├── brief.ipynb
+│   └── 01_OralCancer_Modeling.ipynb
+│
+├── 📁 models/
+│   └── rf_model.pkl
+│
+├── 📁 outputs/
+│   ├── confusion_matrix.png
+│   ├── roc_curve.png
+│   ├── shap_summary_plot.png
+│   └── metrics_summary.json
+│
+├── 📁 reports/
+│   ├── 01_Project_Proposal.pdf
+│   └── 02_Final_Report.pdf
+│
+├── 📁 src/
+│   ├── preprocessing.py
+│   ├── modeling.py
+│   ├── evaluation.py
+│   └── utils.py
+│
+├── 📄 main.py
+├── 📄 requirements.txt
+├── 📄 README.md
+└── 📄 .gitignore
