@@ -69,9 +69,9 @@ To further enhance the predictive value—especially for anticipating cancer **b
 * Random Forest is trained with `class_weight='balanced'`
 * Evaluation is done via:
 
-  * Accuracy: **92.89%**
-  * AUROC: **0.9714**
-  * PR-AUC: **0.9588**
+    * Accuracy: **92.89%**
+    * AUROC: **0.9714**
+    * PR-AUC: **0.9588**
 
 ### Key Visual Outputs:
 
@@ -152,13 +152,6 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
         <sub><b>Yassien Tawfik</b></sub>
       </a>
     </td>
-      <td align="center">
-      <a href="https://github.com/Mazenmarwan023" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/127551364?v=4" width="150px;" alt="Mazen Marwan"/>
-        <br />
-        <sub><b>Mazen Marwan</b></sub>
-      </a>
-    </td>    
     <td align="center">
       <a href="https://github.com/madonna-mosaad" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/127048836?v=4" width="150px;" alt="Madonna Mosaad"/>
@@ -166,6 +159,13 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
         <sub><b>Madonna Mosaad</b></sub>
       </a>
     </td>
+         <td align="center">
+      <a href="https://github.com/Mazenmarwan023" target="_blank">
+        <img src="https://avatars.githubusercontent.com/u/127551364?v=4" width="150px;" alt="Mazen Marwan"/>
+        <br />
+        <sub><b>Mazen Marwan</b></sub>
+      </a>
+    </td>    
   </tr>
 </table>
 </div>
