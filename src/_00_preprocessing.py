@@ -21,8 +21,8 @@ from mlxtend.feature_selection import SequentialFeatureSelector as SFS
 # ──────────────────────────────  CONFIG  ────────────────────────────── #
 RAW_INPUT_DIR = "../data/raw/TCMA/tb09j6496"
 CLEAN_DATA_DIR = "../data/raw/TCMA/clean data"
-FINAL_OUTPUT_DIR = "/Users/yassientawfik/Downloads/Preprocessing/processed_data"
-DROP_FEATURE = "1678"  # feature to omit at the very end
+FINAL_OUTPUT_DIR = "../data/processed"
+DROP_FEATURE = "1678.0"
 N_FEATURES = 17  # number of features to keep with SFS
 # ────────────────────────────────────────────────────────────────────── #
 
@@ -181,48 +181,56 @@ class DataPreprocessor:
 # -----------------------------------------------------------------------------
 # 3. Main pipeline
 # -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# 3. Main pipeline
+# -----------------------------------------------------------------------------
 def main():
-    #  Ensure required data directories exist
+    # Ensure processed-data folder exists (for feature-selected CSVs later)
     os.makedirs("data/processed", exist_ok=True)
 
-    # 3-a. Step 1 – merge raw abundance + metadata
+    # ── 1. Merge raw abundance + metadata ───────────────────────────────────
     merge_raw_data()
 
-    # 3-b. Step 2 – preprocess & select features
+    # ── 2. Pre-process & select top-k features ──────────────────────────────
     pre = DataPreprocessor()
     merged_csvs = [
         "merged_WXS_solid_case_clr.csv",
         "merged_WXS_blood_case_clr.csv",
         "merged_WGS_solid_case_clr.csv",
-        "merged_WGS_blood_case_clr.csv"
+        "merged_WGS_blood_case_clr.csv",
     ]
     big_df = pre.load_and_merge_files(merged_csvs)
     X, y = pre.preprocess(big_df)
     y.name = "label"
     if X is None or y is None:
         return
+
+    # Feature selection (k = N_FEATURES from config)
     X_sel = pre.select(X, y)
 
-    # 3-c. Step 3 – normalize column names to strings and drop feature '1678'
-    X_sel.columns = X_sel.columns.astype(str)
-    pre.selected_features = [str(f) for f in pre.selected_features]
+    # ── 3. Final clean-up — drop feature “1678.0” once & for all ─────────────
+    X_sel.columns = X_sel.columns.map(lambda c: str(c).strip())
+    DROP_FEATURE_ACTUAL = "1678.0"
+    X_sel = X_sel.drop(columns=[DROP_FEATURE_ACTUAL], errors="ignore")
+    pre.selected_features = [
+        f for f in pre.selected_features if str(f).strip() != DROP_FEATURE_ACTUAL
+    ]
+    assert DROP_FEATURE_ACTUAL not in X_sel.columns, "Feature 1678.0 still present!"
 
-    if DROP_FEATURE in X_sel.columns:
-        X_sel.drop(columns=DROP_FEATURE, inplace=True)
-        logging.info(f"Dropped feature '{DROP_FEATURE}' from final dataset.")
-
-    if DROP_FEATURE in pre.selected_features:
-        pre.selected_features.remove(DROP_FEATURE)
-        logging.info(f"Dropped feature '{DROP_FEATURE}' from selected features list.")
-
+    # ── 4. Save outputs ─────────────────────────────────────────────────────
     os.makedirs(FINAL_OUTPUT_DIR, exist_ok=True)
 
-    # combined features + labels
+    # Combine X and y for final output
+    final_df = pd.concat([X_sel, y], axis=1)
     merged_out = os.path.join(FINAL_OUTPUT_DIR, "merged_with_labels.csv")
-    pd.concat([X_sel, y], axis=1).to_csv(merged_out, index=False)
+    final_df.to_csv(merged_out, index=False)
     logging.info(f"Saved → {merged_out}")
 
-    # feature list
+    # Also print the full cleaned table
+    print("\n✅ Final cleaned dataset (with '1678.0' removed):")
+    print(final_df.head())
+
+    # Save selected feature list
     feat_list_file = os.path.join(FINAL_OUTPUT_DIR, "selected_features.txt")
     with open(feat_list_file, "w") as fh:
         fh.write("\n".join(pre.selected_features))
