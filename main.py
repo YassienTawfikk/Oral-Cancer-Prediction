@@ -31,7 +31,7 @@ def main():
     os.makedirs("outputs", exist_ok=True)
 
     # 1. Load data
-    X, y = load_data("data/processed/TCMA/merged_with_labels.csv")
+    X, y = load_data("data/processed/merged_with_labels.csv")
 
     # 2. Split dataset
     X_train, X_test, y_train, y_test = split_data(X, y)
