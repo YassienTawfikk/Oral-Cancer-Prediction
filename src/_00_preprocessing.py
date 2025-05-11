@@ -1,237 +1,232 @@
-import pandas as pd
+"""
+Full preprocessing pipeline for TCMA microbiome data
+
+Steps
+-----
+1. merge_raw_data():   Merge abundance + metadata tables -> clean CSVs
+2. DataPreprocessor:   Pre-processing, scaling, feature selection
+3. main():             Run everything, save outputs
+"""
+
+import os
+import warnings
+import logging
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from mlxtend.feature_selection import SequentialFeatureSelector as SFS
-import os
-import logging
-import warnings
 
-# Suppress warnings
-warnings.filterwarnings('ignore', category=RuntimeWarning)
-warnings.filterwarnings('ignore', category=FutureWarning)
-pd.set_option('future.no_silent_downcasting', True)
+# ──────────────────────────────  CONFIG  ────────────────────────────── #
+RAW_INPUT_DIR = "../data/raw/TCMA/tb09j6496"
+CLEAN_DATA_DIR = "../data/raw/TCMA/clean data"
+FINAL_OUTPUT_DIR = "/Users/yassientawfik/Downloads/Preprocessing/processed_data"
+DROP_FEATURE = "1678"  # feature to omit at the very end
+N_FEATURES = 17  # number of features to keep with SFS
+# ────────────────────────────────────────────────────────────────────── #
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# -----------------------------------------------------------------------------
+# 0. House-keeping
+# -----------------------------------------------------------------------------
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+pd.set_option("future.no_silent_downcasting", True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
+# -----------------------------------------------------------------------------
+# 1. Merge raw abundance + metadata files
+# -----------------------------------------------------------------------------
+def merge_raw_data():
+    """Create cleaned, per-cohort CSVs in CLEAN_DATA_DIR."""
+    configs = [
+        ("WGS", "blood", "sample", "clr"),
+        ("WGS", "blood", "case", "clr"),
+        ("WGS", "solid", "sample", "clr"),
+        ("WGS", "solid", "case", "clr"),
+        ("WXS", "blood", "sample", "clr"),
+        ("WXS", "blood", "case", "clr"),
+        ("WXS", "solid", "sample", "clr"),
+        ("WXS", "solid", "case", "clr"),
+    ]
+
+    os.makedirs(CLEAN_DATA_DIR, exist_ok=True)
+
+    for seq, tissue, level, ext in configs:
+        try:
+            abundance_f = f"{RAW_INPUT_DIR}/bacteria.{seq}.{tissue}.{level}.{ext}.txt"
+            metadata_f = f"{RAW_INPUT_DIR}/metadata.{seq}.{tissue}.{level}.txt"
+            out_csv = f"{CLEAN_DATA_DIR}/merged_{seq}_{tissue}_{level}_{ext}.csv"
+
+            # Abundance: samples in rows after transpose
+            X = pd.read_csv(abundance_f, sep="\t", index_col=0).T
+
+            # Metadata: rename first col to SampleID for join
+            meta = pd.read_csv(metadata_f, sep="\t")
+            meta.rename(columns={meta.columns[0]: "SampleID"}, inplace=True)
+
+            df = X.merge(meta, left_index=True, right_on="SampleID")
+
+            # put metadata columns first
+            meta_cols = meta.columns.tolist()
+            feature_cols = [c for c in df.columns if c not in meta_cols]
+            df = df[meta_cols + feature_cols]
+
+            df.to_csv(out_csv, index=False)
+            logging.info(f"✔  Merged & saved → {out_csv}")
+        except Exception as e:
+            logging.error(f"✘  Error merging {seq}-{tissue}-{level}-{ext}: {e}")
+
+
+# -----------------------------------------------------------------------------
+# 2. Pre-processing + feature selection
+# -----------------------------------------------------------------------------
 class DataPreprocessor:
-    def __init__(self, data_dir='../data/TCMA/Clean data'):
+    def __init__(self, data_dir=CLEAN_DATA_DIR):
         self.data_dir = data_dir
         self.scaler = StandardScaler()
-        self.label_encoder = LabelEncoder()
+        self.encoder = LabelEncoder()
         self.selected_features = None
 
-    def load_and_merge_files(self, file_list, output_filename='merged_all_data.csv'):
-        """Load and merge multiple CSV files into one"""
-        merged_data = pd.DataFrame()
-
-        for file in file_list:
+    # 2-a. merge per-cohort CSVs into one dataframe
+    def load_and_merge_files(self, csv_files, out_name="merged_all_data.csv"):
+        merged = pd.DataFrame()
+        for f in csv_files:
             try:
-                file_path = os.path.join(self.data_dir, file)
-                data = pd.read_csv(file_path, low_memory=False)
+                path = os.path.join(self.data_dir, f)
+                df = pd.read_csv(path, low_memory=False)
+                df["data_source"] = f
+                merged = pd.concat([merged, df], ignore_index=True)
+                logging.info(f"→ merged {f}")
+            except Exception as err:
+                logging.error(f"Could not load {f}: {err}")
 
-                # Add a column to indicate the source file
-                data['data_source'] = file
-
-                # Concatenate with the merged data
-                merged_data = pd.concat([merged_data, data], axis=0, ignore_index=True)
-                logging.info(f"Successfully merged {file}")
-
-            except Exception as e:
-                logging.error(f"Error loading {file}: {str(e)}")
-
-        # Save the merged file
-        if not merged_data.empty:
-            output_path = os.path.join(self.data_dir, output_filename)
-            merged_data.to_csv(output_path, index=False)
-            logging.info(f"Saved merged data to {output_path}")
-            return merged_data
-        else:
-            logging.error("No data was merged - all files failed to load")
+        if merged.empty:
+            logging.error("All merges failed – no data.")
             return None
 
-    def load_data(self, file_name):
-        """Load data from CSV file"""
-        try:
-            file_path = os.path.join(self.data_dir, file_name)
-            # Set low_memory=False to handle mixed types
-            data = pd.read_csv(file_path, low_memory=False)
-            logging.info(f"Successfully loaded {file_name}")
-            return data
-        except Exception as e:
-            logging.error(f"Error loading {file_name}: {str(e)}")
-            return None
+        merged.to_csv(os.path.join(self.data_dir, out_name), index=False)
+        return merged
 
-    def preprocess_data(self, data):
-        """Basic preprocessing steps"""
-        if data is None:
+    # 2-b. clean, impute, encode, scale
+    def preprocess(self, df):
+        if df is None:
             return None, None
 
-        # Log initial shape
-        logging.info(f"Initial data shape: {data.shape}")
+        # numeric medians
+        for col in df.select_dtypes(np.number):
+            df[col].fillna(df[col].median() if not df[col].isna().all() else 0, inplace=True)
 
-        # Handle missing values
-        # For numeric columns, fill with median
-        numeric_cols = data.select_dtypes(include=[np.number]).columns
-        for col in numeric_cols:
-            median_val = data[col].median()
-            if pd.isna(median_val):
-                median_val = 0  # If all values are NaN, use 0
-            data[col] = data[col].fillna(median_val)
+        # categorical modes
+        cat_cols = df.select_dtypes("object").columns
+        for col in cat_cols:
+            df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Unknown", inplace=True)
+            if col not in ["SampleID", "data_source"]:
+                df[col] = self.encoder.fit_transform(df[col].astype(str))
 
-        # For categorical columns, fill with mode
-        categorical_cols = data.select_dtypes(include=['object']).columns
-        for col in categorical_cols:
-            mode_val = data[col].mode()
-            if len(mode_val) > 0:
-                data[col] = data[col].fillna(mode_val[0])
-            else:
-                data[col] = data[col].fillna('Unknown')
-
-        # Log shape after handling missing values
-        logging.info(f"data shape after handling missing values: {data.shape}")
-
-        # Handle categorical variables
-        for col in categorical_cols:
-            if col not in ['SampleID', 'data_source']:  # Don't encode the sample ID or data source
-                data[col] = self.label_encoder.fit_transform(data[col].astype(str))
-
-        # Try different target columns in order of preference
-        target_columns = ['person_neoplasm_cancer_status', 'vital_status', 'tumor_tissue_site', 'icd_10',
-                          'icd_o_3_site']
-        target_col = None
-
-        for col in target_columns:
-            if col in data.columns:
-                target_col = col
-                logging.info(f"Using {col} as target variable")
-                break
-
+        # choose target
+        possible_targets = [
+            "person_neoplasm_cancer_status", "vital_status",
+            "tumor_tissue_site", "icd_10", "icd_o_3_site"
+        ]
+        target_col = next((c for c in possible_targets if c in df.columns), None)
         if target_col is None:
-            logging.error("No suitable target column found in data")
+            logging.error("No target column found.")
             return None, None
 
-        # Separate features and target
-        X = data.drop([target_col, 'SampleID', 'data_source'], axis=1)  # Remove target, sample ID, and data source
-        y = data[target_col]
+        # split X / y
+        drop_cols = [
+            target_col, "SampleID", "data_source", "acronym",
+            "days_to_birth", "days_to_death", "days_to_last_followup",
+            "days_to_initial_pathologic_diagnosis",
+            "tissue_retrospective_collection_indicator",
+            "tissue_prospective_collection_indicator",
+            "project_code", "patient_id", "year_of_initial_pathologic_diagnosis",
+            "tissue_source_site", "form_completion_date", "system_version",
+            "tss_site", "tss_study", "tss_bcr",
+            "TSS_tss_site", "TSS_tss_study", "TSS_tss_bcr",
+            "city_of_procurement", "country_of_procurement",
+            "state_province_of_procurement", "state_province_country_of_procurement"
+        ]
+        X = df.drop([c for c in drop_cols if c in df.columns], axis=1)
+        y = df[target_col]
 
-        # Log shapes before scaling
-        logging.info(f"Features shape before scaling: {X.shape}")
-        logging.info(f"Target shape: {y.shape}")
-
-        # Scale the features
-        X_scaled = self.scaler.fit_transform(X)
-        X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
-
+        X_scaled = pd.DataFrame(self.scaler.fit_transform(X), columns=X.columns)
         return X_scaled, y
 
-    def select_features(self, X, y, n_features_to_select=20):
-        """Perform feature selection using Sequential Feature Selection"""
+    # 2-c. SFS feature selection
+    def select(self, X, y, k=N_FEATURES):
         try:
-            # Split the data
-            X_train, X_test, y_train, y_test = train_test_split(
+            X_train, _, y_train, _ = train_test_split(
                 X, y, test_size=0.3, random_state=42, stratify=y
             )
-
-            # Initialize the base model
-            base_model = LogisticRegression(max_iter=5000)
-
-            # Initialize the Sequential Feature Selector
-            sfs = SFS(
-                base_model,
-                k_features=n_features_to_select,
-                forward=True,
-                floating=False,
-                scoring='accuracy',
-                verbose=2,
-                cv=5
-            )
-
-            # Fit the selector
-            sfs = sfs.fit(X_train.values, y_train)
-
-            # Get selected feature names
-            self.selected_features = [X_train.columns[idx] for idx in sfs.k_feature_idx_]
-            logging.info(f"Selected features: {self.selected_features}")
-
+            model = LogisticRegression(max_iter=5000)
+            sfs = SFS(model, k_features=k, forward=True, floating=False,
+                      scoring="accuracy", cv=5, verbose=0)
+            sfs.fit(X_train.values, y_train)
+            self.selected_features = [X_train.columns[i] for i in sfs.k_feature_idx_]
+            logging.info(f"Selected features ({k}): {self.selected_features}")
             return X[self.selected_features]
-
-        except Exception as e:
-            logging.error(f"Error in feature selection: {str(e)}")
+        except Exception as err:
+            logging.error(f"SFS failed: {err}")
+            self.selected_features = X.columns.tolist()
             return X
 
-    def process_all_files(self):
-        """Process all data files by first merging them"""
-        processed_data = {}
 
-        # List of files to process
-        files = [
-            'merged_WXS_solid_case_clr.csv',
-            'merged_WXS_blood_case_clr.csv',
-            'merged_WGS_solid_case_clr.csv',
-            'merged_WGS_blood_case_clr.csv'
-        ]
-
-        # First merge all files
-        merged_data = self.load_and_merge_files(files)
-        if merged_data is None:
-            return processed_data
-
-        # Now process the merged file
-        logging.info("Processing merged data")
-
-        # Preprocess data
-        X, y = self.preprocess_data(merged_data)
-        if X is None or y is None:
-            return processed_data
-
-        # Select features
-        X_selected = self.select_features(X, y)
-
-        # Store processed data
-        processed_data['merged_all_data'] = {
-            'X': X_selected,
-            'y': y,
-            'selected_features': self.selected_features
-        }
-
-        return processed_data
-
-
+# -----------------------------------------------------------------------------
+# 3. Main pipeline
+# -----------------------------------------------------------------------------
 def main():
-    # Initialize preprocessor
-    preprocessor = DataPreprocessor()
+    #  Ensure required data directories exist
+    os.makedirs("data/processed", exist_ok=True)
 
-    # Process all files (now merged)
-    processed_data = preprocessor.process_all_files()
+    # 3-a. Step 1 – merge raw abundance + metadata
+    merge_raw_data()
 
-    # Save processed data
-    output_dir = '../data/processed'
-    os.makedirs(output_dir, exist_ok=True)
+    # 3-b. Step 2 – preprocess & select features
+    pre = DataPreprocessor()
+    merged_csvs = [
+        "merged_WXS_solid_case_clr.csv",
+        "merged_WXS_blood_case_clr.csv",
+        "merged_WGS_solid_case_clr.csv",
+        "merged_WGS_blood_case_clr.csv"
+    ]
+    big_df = pre.load_and_merge_files(merged_csvs)
+    X, y = pre.preprocess(big_df)
+    y.name = "label"
+    if X is None or y is None:
+        return
+    X_sel = pre.select(X, y)
 
-    for file_name, data in processed_data.items():
-        # Create base file name without extension if present
-        base_name = os.path.splitext(file_name)[0]
+    # 3-c. Step 3 – normalize column names to strings and drop feature '1678'
+    X_sel.columns = X_sel.columns.astype(str)
+    pre.selected_features = [str(f) for f in pre.selected_features]
 
-        # Save features (X) as CSV
-        features_file = os.path.join(output_dir, f'processed_{base_name}.csv')
-        data['X'].to_csv(features_file, index=False)
+    if DROP_FEATURE in X_sel.columns:
+        X_sel.drop(columns=DROP_FEATURE, inplace=True)
+        logging.info(f"Dropped feature '{DROP_FEATURE}' from final dataset.")
 
-        # Save target (y) as CSV
-        target_file = os.path.join(output_dir, f'target_{base_name}.csv')
-        pd.DataFrame(data['y']).to_csv(target_file, index=False)
+    if DROP_FEATURE in pre.selected_features:
+        pre.selected_features.remove(DROP_FEATURE)
+        logging.info(f"Dropped feature '{DROP_FEATURE}' from selected features list.")
 
-        # Save selected features list
-        features_list_file = os.path.join(output_dir, f'selected_features_{base_name}.txt')
-        with open(features_list_file, 'w') as f:
-            f.write('\n'.join(data['selected_features']))
+    os.makedirs(FINAL_OUTPUT_DIR, exist_ok=True)
 
-        logging.info(f"Saved processed data to {features_file}")
-        logging.info(f"Saved target to {target_file}")
-        logging.info(f"Saved selected features to {features_list_file}")
+    # combined features + labels
+    merged_out = os.path.join(FINAL_OUTPUT_DIR, "merged_with_labels.csv")
+    pd.concat([X_sel, y], axis=1).to_csv(merged_out, index=False)
+    logging.info(f"Saved → {merged_out}")
+
+    # feature list
+    feat_list_file = os.path.join(FINAL_OUTPUT_DIR, "selected_features.txt")
+    with open(feat_list_file, "w") as fh:
+        fh.write("\n".join(pre.selected_features))
+    logging.info(f"Saved feature list → {feat_list_file}")
 
 
 if __name__ == "__main__":

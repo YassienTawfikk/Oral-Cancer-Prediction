@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import os
 from sklearn.metrics import (
     classification_report,
     roc_auc_score,
@@ -53,8 +54,14 @@ def plot_and_save_roc_curve(model, X_test, y_test, path: str):
     plt.close()
 
 
+
+
 def save_text_report(accuracy, roc_auc, pr_auc, report_text, path: str):
     """Save a human-readable text summary of the evaluation metrics."""
+
+    # Ensure the parent directory exists
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
     with open(path, "w") as f:
         f.write("Model Evaluation Report\n")
         f.write("=======================\n\n")

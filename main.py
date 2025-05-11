@@ -1,3 +1,18 @@
+"""
+NOTE:
+-----
+Please make sure to run the preprocessing step before executing this script.
+
+Run the following command first:
+    python src/_00_preprocessing.py
+
+This will generate the file:
+    data/processed/TCMA/merged_with_labels.csv
+
+The pipeline below depends on that file for training and evaluation.
+"""
+
+import os
 from src._01_fetching import load_data, split_data
 from src._02_modeling import train_random_forest, get_shap_values
 from src._03_evaluation import (
@@ -11,6 +26,10 @@ import shap
 
 
 def main():
+    #  Ensure required output directories exist
+    os.makedirs("models", exist_ok=True)
+    os.makedirs("outputs", exist_ok=True)
+
     # 1. Load data
     X, y = load_data("data/processed/TCMA/merged_with_labels.csv")
 
