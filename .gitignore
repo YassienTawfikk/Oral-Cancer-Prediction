@@ -1,0 +1,26 @@
+
+# Data (keep folder structure)
+data/raw/*
+data/processed/*
+
+# Models
+models/*.pkl
+/models/best_model_metadata.json
+
+# Output artifacts
+outputs/*.json
+outputs/*.txt
+outputs/*.csv
+outputs/*.png
+
+# OS + Jupyter clutter + Idea
+.DS_Store
+.ipynb_checkpoints/
+/.idea/modules.xml
+/.idea/Oral Cancer Prediction.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+
+# Docs
+*.docx
+

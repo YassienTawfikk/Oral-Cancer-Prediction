@@ -21,9 +21,12 @@ OralCancerPrediction/
 │   ├── shap_summary_plot.png
 │   └── metrics_summary.json
 │
-├── 📁 reports/
-│   ├── 01_Project_Proposal.pdf
-│   └── 02_Final_Report.pdf
+├── 📁 outputs/
+│   ├── 📁 reports/
+│   │   ├── 01_Project_Proposal.pdf
+│   │   └── 02_Final_Report.pdf
+│   │
+│   └── ProjectStructure.txt
 │
 ├── 📁 src/
 │   ├── preprocessing.py

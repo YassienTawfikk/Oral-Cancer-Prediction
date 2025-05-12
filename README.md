@@ -62,6 +62,10 @@ This will generate:
 
 ## 🤖 Model Training & Evaluation
 
+This project presents a predictive approach to assessing oral cancer likelihood based on microbiome profiles. The model analyzes microbial patterns and provides a probability-based prediction that supports non-invasive diagnostic decision-making.
+
+To further enhance the predictive value—especially for anticipating cancer **before** clinical onset—future iterations could integrate **longitudinal data**, enabling time-aware modeling and early detection frameworks. Incorporating methods like **survival analysis**, **Cox regression**, or **deep learning-based time-to-event modeling** would support forecasting the potential onset or progression of oral cancer more precisely over time.
+
 * Random Forest is trained with `class_weight='balanced'`
 * Evaluation is done via:
 
@@ -71,12 +75,10 @@ This will generate:
 
 ### Key Visual Outputs:
 
-<p align="left">
-  <img src="https://github.com/user-attachments/assets/5cea0344-c120-402d-8074-2ae8590372e3" width="400" alt="confusion_matrix"/>
-  <br>
-  <img src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="400" alt="roc_curve"/>
-  <br>
-  <img src="https://github.com/user-attachments/assets/53f14d6f-0f22-440c-a5d4-4e4540b5df5b" width="400" alt="shap_summary_plot"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5cea0344-c120-402d-8074-2ae8590372e3" width="300" alt="confusion_matrix"/>
+  <img    src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="300" alt="roc_curve"/>
+  <img src="https://github.com/user-attachments/assets/53f14d6f-0f22-440c-a5d4-4e4540b5df5b" width="387" alt="shap_summary_plot"/>
 </p>
 
 ---
@@ -150,13 +152,6 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
         <sub><b>Yassien Tawfik</b></sub>
       </a>
     </td>
-      <td align="center">
-      <a href="https://github.com/Mazenmarwan023" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/127551364?v=4" width="150px;" alt="Mazen Marwan"/>
-        <br />
-        <sub><b>Mazen Marwan</b></sub>
-      </a>
-    </td>    
     <td align="center">
       <a href="https://github.com/madonna-mosaad" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/127048836?v=4" width="150px;" alt="Madonna Mosaad"/>
@@ -164,6 +159,14 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
         <sub><b>Madonna Mosaad</b></sub>
       </a>
     </td>
+         <td align="center">
+      <a href="https://github.com/Mazenmarwan023" target="_blank">
+        <img src="https://avatars.githubusercontent.com/u/127551364?v=4" width="150px;" alt="Mazen Marwan"/>
+        <br />
+        <sub><b>Mazen Marwan</b></sub>
+      </a>
+    </td>    
+
   </tr>
 </table>
 </div>
