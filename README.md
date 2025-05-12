@@ -77,7 +77,7 @@ To further enhance the predictive value—especially for anticipating cancer **b
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/5cea0344-c120-402d-8074-2ae8590372e3" width="300" alt="confusion_matrix"/>
-  <img    src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="300" alt="roc_curve"/>
+  <img src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="300" alt="roc_curve"/>
   <img src="https://github.com/user-attachments/assets/53f14d6f-0f22-440c-a5d4-4e4540b5df5b" width="387" alt="shap_summary_plot"/>
 </p>
 
@@ -166,7 +166,6 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
         <sub><b>Mazen Marwan</b></sub>
       </a>
     </td>    
-
   </tr>
 </table>
 </div>
