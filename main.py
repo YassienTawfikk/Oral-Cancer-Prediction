@@ -18,7 +18,9 @@ from src._02_modeling import train_random_forest, get_shap_values
 from src._03_evaluation import (
     evaluate_model,
     plot_and_save_confusion_matrix,
-    plot_and_save_roc_curve
+    plot_and_save_roc_curve,
+    plot_heatmap,
+    plot_pipeline
 )
 from src._04_utils import save_model, save_json
 import matplotlib.pyplot as plt
@@ -48,6 +50,10 @@ def main():
     # 6. Save confusion matrix and ROC
     plot_and_save_confusion_matrix(y_test, y_pred, "outputs/confusion_matrix.png")
     plot_and_save_roc_curve(model, X_test, y_test, "outputs/roc_curve.png")
+    plot_pipeline("outputs/pipeline.png")
+    taxa=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"]
+    #taxa=["race","primary_therapy_outcome_success","anatomic_neoplasm_subdivision","kras_gene_analysis_performed","lymphatic_invasion","preoperative_pretreatment_cea_level","history_of_colon_polyps","circumferential_resection_margin","colon_polyps_present","braf_gene_analysis_performed","synchronous_colon_cancer_present","loss_expression_of_mismatch_repair_proteins_by_ihc","lymphnodes_positive_percent","margin_status","additional_radiation_therapy","planned_surgery_status"]
+    plot_heatmap(model,X_test,taxa,"outputs/confusion_matrix.png")
 
     # 7. SHAP explainability
     print("Generating SHAP summary plot...")
