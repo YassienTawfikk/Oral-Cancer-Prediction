@@ -23,8 +23,8 @@ OralCancerPrediction/
 │
 ├── 📁 outputs/
 │   ├── 📁 reports/
-│   │   ├── 01_Project_Proposal.pdf
-│   │   └── 02_Final_Report.pdf
+│   │   ├── _01_Project_Proposal.pdf
+│   │   └── _02_Final_Report.pdf
 │   │
 │   └── ProjectStructure.txt
 │
