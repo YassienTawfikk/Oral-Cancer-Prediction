@@ -4,7 +4,7 @@ This project builds a machine learning pipeline to predict oral cancer using mic
 
 ---
 
-## 📌 Overview
+## Overview
 
 * **Goal:** Predict oral cancer based on microbial features derived from 16S rRNA and WGS data.
 * **Model Used:** Random Forest Classifier
@@ -13,18 +13,18 @@ This project builds a machine learning pipeline to predict oral cancer using mic
 
 ---
 
-## 🧬 Data Source
+## Data Source
 
 Due to data licensing and privacy considerations, **the full TCMA dataset is not included** in this repository.
 
-### 📥 To Reproduce:
+### To Reproduce:
 
 Please download the following data files from TCMA:
 
 * [`bacteria.WGS.solid.case.clr.txt`](https://tcma.pratt.duke.edu/downloads)
 * `metadata.WGS.solid.case.txt`
 
-> 📂 Place them in the following directory:
+> Place them in the following directory:
 
 ```
 data/raw/TCMA/
@@ -40,14 +40,14 @@ Then, run the preprocessing script as described below.
 
 ---
 
-## 🧪 Preprocessing Pipeline
+## Preprocessing Pipeline
 
 * We use **only TCMA** (not HOMD) due to data inconsistency issues.
 * Merging, cleaning, imputing, scaling, and feature selection are performed.
 * Sequential Feature Selection (SFS) chooses the most informative 17 features.
 * Feature `1678.0` is explicitly dropped due to noise.
 
-### ⚙️ Run preprocessing (takes time depending on CPU):
+### Run preprocessing (takes time depending on CPU):
 
 ```bash
 python src/preprocessing.py
@@ -60,7 +60,7 @@ This will generate:
 
 ---
 
-## 🤖 Model Training & Evaluation
+## Model Training & Evaluation
 
 This project presents a predictive approach to assessing oral cancer likelihood based on microbiome profiles. The model analyzes microbial patterns and provides a probability-based prediction that supports non-invasive diagnostic decision-making.
 
@@ -97,7 +97,7 @@ notebooks/_01_OralCancer_Modeling.ipynb
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 OralCancerPrediction/
@@ -131,7 +131,7 @@ OralCancerPrediction/
 
 ---
 
-## 🧠 SHAP Explainability
+## SHAP Explainability
 
 * Global feature importance is visualized using `summary_plot`
 * Additional force plots explain individual predictions
@@ -140,7 +140,7 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
 
 ---
 
-## 👤 Contributor
+## Contributor
 
 <div>
 <table align="center">
@@ -169,9 +169,3 @@ See: `notebooks/_02_SHAP_Explainability.ipynb`
   </tr>
 </table>
 </div>
-
----
-
-## 📌 Note
-
-This repository is for academic and demonstration purposes only. Ensure you comply with the TCMA terms of use when downloading data.
