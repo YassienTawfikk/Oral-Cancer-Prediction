@@ -1,99 +1,120 @@
 # Oral Cancer Prediction Using Microbiome Data
 
-This project builds a machine learning pipeline to predict oral cancer using microbiome data sourced from The Cancer Microbiome Atlas (TCMA). It includes end-to-end preprocessing, feature selection, model training, evaluation, and explainability using SHAP values.
+<p align='center'>
+<img width="800" alt="20250814_1610_Oral Cancer Insights_simple_compose_01k2mb5bswe7xvy7k147sd21j9" src="https://github.com/user-attachments/assets/a122a6bc-91ce-4a14-bfc7-4a503c579fb7" />
+</p>
+
+This project implements a machine learning pipeline for predicting oral cancer using microbiome data from **The Cancer Microbiome Atlas (TCMA)**. It covers data preprocessing, feature selection, model training, evaluation, and model explainability using SHAP values.
 
 ---
 
 ## Overview
 
-* **Goal:** Predict oral cancer based on microbial features derived from 16S rRNA and WGS data.
-* **Model Used:** Random Forest Classifier
-* **Explainability:** SHAP (SHapley Additive exPlanations)
-* **Tools:** scikit-learn, pandas, matplotlib, shap, joblib
+* **Goal:** Predict oral cancer likelihood from microbial profiles derived from 16S rRNA and WGS data.
+* **Model Used:** Random Forest Classifier (class\_weight = 'balanced').
+* **Explainability:** SHAP (SHapley Additive exPlanations).
+* **Tools:** scikit-learn, pandas, matplotlib, shap, joblib.
 
 ---
 
 ## Data Source
 
-Due to data licensing and privacy considerations, **the full TCMA dataset is not included** in this repository.
+Due to licensing restrictions, **the full TCMA dataset is not included** in this repository.
 
 ### To Reproduce:
 
-Please download the following data files from TCMA:
+Download the following files from TCMA:
 
 * [`bacteria.WGS.solid.case.clr.txt`](https://tcma.pratt.duke.edu/downloads)
 * `metadata.WGS.solid.case.txt`
 
-> Place them in the following directory:
+Place them here:
 
 ```
 data/raw/TCMA/
 ```
 
-You must also download and install the required Python packages using:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Then, run the preprocessing script as described below.
-
----
-
-## Preprocessing Pipeline
-
-* We use **only TCMA** (not HOMD) due to data inconsistency issues.
-* Merging, cleaning, imputing, scaling, and feature selection are performed.
-* Sequential Feature Selection (SFS) chooses the most informative 17 features.
-* Feature `1678.0` is explicitly dropped due to noise.
-
-### Run preprocessing (takes time depending on CPU):
+Run preprocessing:
 
 ```bash
 python src/preprocessing.py
 ```
 
-This will generate:
+Outputs:
 
 * `data/processed/merged_with_labels.csv`
 * `data/processed/selected_features.txt`
 
 ---
 
-## Model Training & Evaluation
+## Preprocessing Pipeline
 
-This project presents a predictive approach to assessing oral cancer likelihood based on microbiome profiles. The model analyzes microbial patterns and provides a probability-based prediction that supports non-invasive diagnostic decision-making.
-
-To further enhance the predictive value—especially for anticipating cancer **before** clinical onset—future iterations could integrate **longitudinal data**, enabling time-aware modeling and early detection frameworks. Incorporating methods like **survival analysis**, **Cox regression**, or **deep learning-based time-to-event modeling** would support forecasting the potential onset or progression of oral cancer more precisely over time.
-
-* Random Forest is trained with `class_weight='balanced'`
-* Evaluation is done via:
-
-    * Accuracy: **92.89%**
-    * AUROC: **0.9714**
-    * PR-AUC: **0.9588**
-
-### Key Visual Outputs:
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/5cea0344-c120-402d-8074-2ae8590372e3" width="300" alt="confusion_matrix"/>
-  <img src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="300" alt="roc_curve"/>
-  <img src="https://github.com/user-attachments/assets/53f14d6f-0f22-440c-a5d4-4e4540b5df5b" width="387" alt="shap_summary_plot"/>
-</p>
+* Only TCMA data is used due to HOMD inconsistencies.
+* Data merging, cleaning, imputation, scaling, and feature selection applied.
+* Sequential Feature Selection (SFS) selects **17 most informative features**.
+* Feature `1678.0` removed due to noise.
 
 ---
 
-### Run the full pipeline:
+## Model Training & Evaluation
 
-```bash
-python main.py
-```
+The trained model supports **non-invasive oral cancer prediction** by identifying patterns in microbiome profiles.
 
-Or step through it via notebook:
+**Metrics:**
 
-```bash
-notebooks/_01_OralCancer_Modeling.ipynb
-```
+* **Accuracy:** 92.89%
+* **AUROC:** 0.9714
+* **PR-AUC:** 0.9588
+
+### Confusion Matrix
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5cea0344-c120-402d-8074-2ae8590372e3" width="380" alt="confusion_matrix"/>
+</p>
+
+**Interpretation:**
+
+* **True Negatives (TN):** 269 samples correctly classified as non-cancer.
+* **True Positives (TP):** 123 samples correctly classified as cancer.
+* **False Positives (FP):** 13 non-cancer samples misclassified as cancer.
+* **False Negatives (FN):** 17 cancer samples missed by the model.
+
+This reflects **high specificity** and **balanced sensitivity**.
+
+---
+
+### ROC Curve
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/186b44e7-361d-44e8-99f5-457a57e2e55e" width="380" alt="roc_curve"/>
+</p>
+
+**Interpretation:**
+
+* **AUC = 0.97**, indicating excellent discriminatory ability between cancer and non-cancer cases.
+* The curve stays close to the top-left corner, suggesting **low false positive rate** and **high true positive rate**.
+
+---
+
+## SHAP Explainability
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/53f14d6f-0f22-440c-a5d4-4e4540b5df5b" width="500" alt="shap_summary_plot"/>
+</p>
+
+**Interpretation:**
+
+* SHAP interaction values reveal the **most influential microbial features** for predicting oral cancer.
+* Positive SHAP values (red) indicate features that **increase cancer prediction probability**, while negative values (blue) suggest features that **reduce it**.
+* This enables transparency and potential **biological insight** into cancer-related microbiome patterns.
+
+For deeper exploration, refer to: `notebooks/_02_SHAP_Explainability.ipynb`
 
 ---
 
@@ -102,41 +123,46 @@ notebooks/_01_OralCancer_Modeling.ipynb
 ```
 OralCancerPrediction/
 ├── data/
-│   ├── raw/                  # Place downloaded TCMA files here
+│   ├── raw/                  # Place TCMA files here
 │   └── processed/            # Outputs from preprocessing
 │       ├── merged_with_labels.csv
 │       └── selected_features.txt
-├── notebooks/               # Jupyter notebooks
+├── notebooks/
 │   ├── _00_brief.ipynb
 │   ├── _01_OralCancer_Modeling.ipynb
 │   ├── _02_SHAP_Explainability.ipynb
 │   └── _03_Deployment_Testing.ipynb
 ├── models/
-│   └── rf_model.pkl          # Trained Random Forest model
-├── outputs/                 # Evaluation results
+│   └── rf_model.pkl
+├── outputs/
 │   ├── confusion_matrix.png
 │   ├── roc_curve.png
 │   ├── shap_summary_plot.png
 │   ├── metrics_summary.json
 │   └── metrics_summary.txt
-├── src/                     # Source code
+├── src/
 │   ├── preprocessing.py
 │   ├── modeling.py
 │   ├── evaluation.py
 │   └── utils.py
-├── main.py                  # Main script to run pipeline
+├── main.py
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## SHAP Explainability
+## Running the Full Pipeline
 
-* Global feature importance is visualized using `summary_plot`
-* Additional force plots explain individual predictions
+```bash
+python main.py
+```
 
-See: `notebooks/_02_SHAP_Explainability.ipynb`
+Or use the step-by-step Jupyter Notebook:
+
+```bash
+notebooks/_01_OralCancer_Modeling.ipynb
+```
 
 ---
 
