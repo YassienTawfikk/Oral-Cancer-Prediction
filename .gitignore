@@ -1,26 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Data (keep folder structure)
-data/raw/*
-data/processed/*
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Models
-models/*.pkl
-/models/best_model_metadata.json
-
-# Output artifacts
-outputs/*.json
-outputs/*.txt
-outputs/*.csv
-outputs/*.png
-
-# OS + Jupyter clutter + Idea
+# IDEs
+.idea/
+.vscode/
+*.swp
 .DS_Store
-.ipynb_checkpoints/
-/.idea/modules.xml
-/.idea/Oral Cancer Prediction.iml
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/inspectionProfiles/Project_Default.xml
 
-# Docs
-*.docx
+# Project outputs
+outputs/
+models/
+logs/
 
+# Data
+data/processed/
+data/raw/
